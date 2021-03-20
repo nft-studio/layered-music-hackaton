@@ -30,20 +30,20 @@ async function main() {
   try {
     console.log('Trying minting track...')
 
-    const buy = await nftContract.methods
-      .buyMinting()
-      .send({ from: OWNER_ADDRESS, value: web3Instance.utils.toWei("0.05", "ether") });
-    console.log(JSON.stringify(buy))
-
     const balance = await nftContract.methods
       .balanceOfMinting().call();
-    console.log(balance)
+    console.log('CAN MINT', balance, 'TRACKS')
     if (balance > 0) {
+      const getRandom = await nftContract.methods
+        .createRandomSeed(new Date().getTime()).call();
+      console.log('RANDOM SEED', getRandom)
       const result = await nftContract.methods
-        .mintTrack('0x000000000000000000000000000004')
+        .mintTrack(getRandom)
         .send({ from: OWNER_ADDRESS });
       console.log("Minted track! Transaction: " + result.transactionHash);
       console.log(result)
+    }else{
+      console.log('INSUFFICIENT BALANCE')
     }
   } catch (e) {
     console.log(e)

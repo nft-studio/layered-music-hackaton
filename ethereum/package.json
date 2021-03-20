@@ -10,6 +10,7 @@
     "ganache:deploy": "truffle deploy --reset",
     "ganache:mint": "node ganache/mint.js",
     "ganache:burn": "node ganache/burn.js",
+    "ganache:buy": "node ganache/buy.js",
     "ganache:reward": "node ganache/reward.js",
     "ganache:test": "node ganache/test.js",
     "ganache:withdraw": "node ganache/withdraw.js",
