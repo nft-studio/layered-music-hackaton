@@ -2,17 +2,7 @@ const HDWalletProvider = require("truffle-hdwallet-provider");
 const web3 = require("web3");
 require('dotenv').config()
 const MNEMONIC = process.env.MNEMONIC;
-const NODE_API_KEY = process.env.INFURA_KEY || process.env.ALCHEMY_KEY;
 const NFT_CONTRACT_ADDRESS = process.env.NFT_CONTRACT_ADDRESS;
-const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
-const NETWORK = process.env.NETWORK;
-
-if (!MNEMONIC || !NODE_API_KEY || !OWNER_ADDRESS || !NETWORK) {
-  console.error(
-    "Please set a mnemonic, Alchemy/Infura key, owner, network, and contract address."
-  );
-  return;
-}
 const NFT_CONTRACT_ABI = require('../build/abi.json')
 
 async function main() {

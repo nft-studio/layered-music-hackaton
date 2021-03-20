@@ -28,7 +28,7 @@ async function main() {
   console.log('Owner is', owner)
 
   try {
-    console.log('Trying minting track...')
+    console.log('Trying buying track...')
 
     const buy = await nftContract.methods
       .buyMinting()

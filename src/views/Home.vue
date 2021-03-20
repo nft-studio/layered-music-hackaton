@@ -10,9 +10,9 @@
       >
     </div>
     <div v-if="account">
-      <!--<b>Welcome back</b><br /><i style="font-size: 12px">{{ account }}</i>
+      <b>Welcome back</b><br /><i style="font-size: 12px">{{ account }}</i>
       <br />
-      <hr />-->
+      <hr />
       <div class="row" style="padding-top: 15px">
         <div class="columns">
           <div class="column">
@@ -30,11 +30,15 @@
                     <b-button>Generate random seed</b-button>
                   </div>
                   <div v-if="balanceMinting === 0">
-                    You must pay 0.05 ETH for each track, please select how many tracks do you want to buy:
-                    <br>
+                    You must pay 0.05 ETH for each track, please select how many
+                    tracks do you want to buy:
+                    <br />
                     <b-numberinput v-model="howMuchBuy"></b-numberinput>
-                    <br>
-                    <b-button>Buy {{ howMuchBuy }} tracks for {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button>
+                    <br />
+                    <b-button v-on:click="buyMintings"
+                      >Buy {{ howMuchBuy }} tracks for
+                      {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button
+                    >
                   </div>
                 </div>
               </b-tab-item>
@@ -102,7 +106,7 @@ export default {
       const app = this;
       if (app.account !== "") {
         try {
-          let owned = await app.contract.methods.ownedTracks().call();
+          let owned = await app.contract.methods.ownedTracks().call({ from: app.account });
           app.nftOwned = owned;
         } catch (e) {
           alert(e);
@@ -110,11 +114,27 @@ export default {
         try {
           let balanceMinting = await app.contract.methods
             .balanceOfMinting()
-            .call();
+            .call({ from: app.account });
           app.balanceMinting = parseInt(balanceMinting);
         } catch (e) {
           alert(e);
         }
+      }
+    },
+    async buyMintings() {
+      const app = this;
+      const ethAmount = (app.howMuchBuy * 0.05).toFixed(2);
+      try {
+        const tx = await app.contract.methods.buyMinting().send({
+          from: app.account,
+          value: app.web3.utils.toWei(ethAmount, "ether"),
+        });
+        console.log(tx);
+        alert("You just bought " + app.howMuchBuy + " tracks");
+        app.howMuchBuy = 1;
+        app.checkContractUserState();
+      } catch (e) {
+        alert("Something went wrong!");
       }
     },
   },
