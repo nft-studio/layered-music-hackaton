@@ -27,7 +27,7 @@ contract LayeredMusic is ERC721Tradable {
     }
 
     function contractURI() public pure returns (string memory) {
-        return "https://ipfs.io/ipfs/QmeccJSPZdWf5kVrmegUL41frH5ynmbzdh5uLAjDEyHpFp";
+        return "https://raw.githubusercontent.com/Nft-Studio/layered-music-hackaton/master/ethereum/details.json";
     }
 
     function trackExists(string memory tokenHash) internal view returns (bool) {
