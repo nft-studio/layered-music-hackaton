@@ -1,7 +1,6 @@
 pragma solidity ^0.5.0;
-
+pragma experimental ABIEncoderV2;
 import "./ERC721Tradable.sol";
-import './Authorizations.sol';
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
@@ -12,11 +11,14 @@ contract LayeredMusic is ERC721Tradable {
 
     // Authorization feature
     bool USE_AUTHORED_USERS = true;
-    using Authorizations for Authorizations.Addresses;
-    Authorizations.Addresses trustedMinters;
 
     // Unique feature
     mapping (string => address) private _absoluteHashes;
+    mapping (address => string[]) private _creators;
+
+    // Payable minting features
+    uint256 mintingCost = 50 finney;
+    mapping (address => uint256) private _buyedMintings;
 
     constructor(address _proxyRegistryAddress)
         public
@@ -40,40 +42,57 @@ contract LayeredMusic is ERC721Tradable {
         return _absoluteHashes[hash];
     }
 
+    function ownedTracks() public view returns (string[] memory) {
+        return _creators[msg.sender];
+    }
+
     function trackCounts(string memory hash) public view returns (uint256) {
         return returnTokenId();
     }
 
-    function canMint(string memory tokenURI, uint amount) internal returns (bool){
-        if(USE_AUTHORED_USERS){
-            require(trustedMinters.exists(msg.sender), 'The sender address is not registered as a Minter');
-        }
+    function canMint(string memory tokenURI) internal returns (bool){
+        require(_buyedMintings[msg.sender] > 0, 'The sender address didn\'t buyed any minting');
         require(!trackExists(tokenURI), "LayeredMusic: Trying to mint existent track");
         return true;
     }
 
     function mintTrack(string memory tokenURI) public returns (uint256) {
-        require(canMint(tokenURI, 1), "LayeredMusic: Can't mint token");
+        require(canMint(tokenURI), "LayeredMusic: Can't mint token");
         uint256 tokenId = mintTo(msg.sender, tokenURI);
         _absoluteHashes[tokenURI] = msg.sender;
+        _creators[msg.sender].push(tokenURI);
+        _buyedMintings[msg.sender]--;
         return tokenId;
     }
 
     function rewardTrack(address account, string memory tokenURI) public returns (uint256) {
-        require(canMint(tokenURI, 1), "LayeredMusic: Can't mint token");
+        require(canMint(tokenURI), "LayeredMusic: Can't mint token");
         uint256 tokenId = mintTo(account, tokenURI);
         _absoluteHashes[tokenURI] = msg.sender;
         return tokenId;
     }
 
-    function addMinter(address minter) public onlyOwner {
-        trustedMinters.pushAddress(minter);
+    // Payment functions
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 
-    function removeMinter(address minter) public onlyOwner {
-        trustedMinters.removeAddress(minter);
+    function buyMinting() public payable {
+        require(msg.value % mintingCost == 0, 'LayeredMusic: Amount should be a multiple of 0.05 ETH');
+        uint256 amount = msg.value / mintingCost;
+        _buyedMintings[msg.sender] += amount;
     }
 
+    function balanceOfMinting() public view returns (uint256) {
+        return _buyedMintings[msg.sender];
+    }
+
+    function withdrawEther() public onlyOwner {
+        msg.sender.transfer(address(this).balance);
+    }
+
+    // Random functions
     function createRandomSeed(uint256 timestamp) public view returns (bytes32) {
         bytes32 seed = 
             keccak256(

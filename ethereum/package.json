@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "ganache-cli": "ganache-cli -d -p 7545 --gasLimit=10000000",
-    "extract-abi": "truffle-export-abi -d ./build/contracts/ -o ../src/util/abi.json -v",
+    "extract-abi": "truffle-export-abi -d ./build/contracts/ -o ../src/util/abi.json -v && truffle-export-abi -d ./build/contracts/ -o ./build/abi.json",
     "test": "truffle test",
     "ganache:deploy": "truffle deploy --reset",
     "ganache:mint": "node ganache/mint.js",

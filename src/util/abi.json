@@ -3336,6 +3336,19 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "value1",
+        "type": "uint256"
+      }
+    ],
+    "name": "buyed_amount",
+    "type": "event"
+  },
+  {
     "constant": false,
     "inputs": [
       {
@@ -3862,6 +3875,21 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "ownedTracks",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "internalType": "string",
@@ -3929,30 +3957,48 @@
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
+    "constant": true,
+    "inputs": [],
+    "name": "getBalance",
+    "outputs": [
       {
-        "internalType": "address",
-        "name": "minter",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "addMinter",
-    "outputs": [],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "constant": false,
-    "inputs": [
+    "inputs": [],
+    "name": "buyMinting",
+    "outputs": [],
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "balanceOfMinting",
+    "outputs": [
       {
-        "internalType": "address",
-        "name": "minter",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "removeMinter",
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "withdrawEther",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
