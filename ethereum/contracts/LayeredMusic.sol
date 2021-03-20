@@ -9,9 +9,6 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  */
 contract LayeredMusic is ERC721Tradable {
 
-    // Authorization feature
-    bool USE_AUTHORED_USERS = true;
-
     // Unique feature
     mapping (string => address) private _absoluteHashes;
     mapping (address => string[]) private _creators;
