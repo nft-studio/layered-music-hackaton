@@ -40,7 +40,7 @@ async function main() {
     console.log(balance)
     if (balance > 0) {
       const result = await nftContract.methods
-        .mintTrack('0x000000000000000000000000000003')
+        .mintTrack('0x000000000000000000000000000004')
         .send({ from: OWNER_ADDRESS });
       console.log("Minted track! Transaction: " + result.transactionHash);
       console.log(result)

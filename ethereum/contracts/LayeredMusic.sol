@@ -89,6 +89,7 @@ contract LayeredMusic is ERC721Tradable {
     }
 
     function withdrawEther() public onlyOwner {
+        require(address(this).balance > 0, 'LayeredMusic: Nothing to withdraw!');
         msg.sender.transfer(address(this).balance);
     }
 

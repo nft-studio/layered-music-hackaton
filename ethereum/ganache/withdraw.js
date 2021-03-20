@@ -28,11 +28,14 @@ async function main() {
   console.log('Owner is', owner)
 
   try {
-    console.log('Trying revoking minter...')
+    console.log('Trying withdrawing amount...')
+    const balance = await nftContract.methods
+      .getBalance().call();
+    console.log('Balance of Contract is', balance)
     const result = await nftContract.methods
-      .removeMinter(OWNER_ADDRESS)
+      .withdrawEther()
       .send({ from: OWNER_ADDRESS });
-    console.log("Revoked authorization! Transaction: " + result.transactionHash);
+    console.log("Ether withdrawed! Transaction: " + result.transactionHash);
     console.log(result)
   } catch (e) {
     console.log(e)
