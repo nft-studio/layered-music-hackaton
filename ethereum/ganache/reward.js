@@ -30,7 +30,7 @@ async function main() {
   try {
     console.log('Trying rewarding opera to ...')
     const result = await nftContract.methods
-      .rewardOpera('0x9e910D267Db6Dd064b2214Ce0878f83fFc7DE40a', '0x000000000000000000000000000004')
+      .rewardTrack('0x9e910D267Db6Dd064b2214Ce0878f83fFc7DE40a', '0x000000000000000000000000000004')
       .send({ from: OWNER_ADDRESS });
     console.log("Minted opera! Transaction: " + result.transactionHash);
     console.log(result)
