@@ -23,12 +23,14 @@ contract LayeredMusic is ERC721Tradable {
     {}
 
     function baseTokenURI() public pure returns (string memory) {
-        return "https://ipfs.io/ipfs/";
+        return "https://layeredmusic.nftstud.io/api/";
     }
 
     function contractURI() public pure returns (string memory) {
         return "https://raw.githubusercontent.com/Nft-Studio/layered-music-hackaton/master/ethereum/details.json";
     }
+
+    // Existence functions
 
     function trackExists(string memory tokenHash) internal view returns (bool) {
         address owner = _absoluteHashes[tokenHash];
@@ -46,6 +48,8 @@ contract LayeredMusic is ERC721Tradable {
     function trackCounts(string memory hash) public view returns (uint256) {
         return returnTokenId();
     }
+
+    // Minting functions
 
     function canMint(string memory tokenURI) internal returns (bool){
         require(_buyedMintings[msg.sender] > 0, 'The sender address didn\'t buyed any minting');
@@ -91,6 +95,7 @@ contract LayeredMusic is ERC721Tradable {
     }
 
     // Random functions
+    
     function createRandomSeed(uint256 timestamp) public view returns (bytes32) {
         bytes32 seed = 
             keccak256(

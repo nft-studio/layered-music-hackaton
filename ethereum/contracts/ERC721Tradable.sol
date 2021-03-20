@@ -24,7 +24,7 @@ contract ERC721Tradable is ERC721Full, Ownable {
         address _proxyRegistryAddress
     ) public ERC721Full(_name, _symbol) {
         proxyRegistryAddress = _proxyRegistryAddress;
-        _setBaseURI("https://ipfs.io/ipfs/");
+        _setBaseURI("https://layeredmusic.nftstud.io/api/");
     }
 
     /**

@@ -1,14 +1,52 @@
 <template>
   <div class="home" style="padding: 5vh 30%; font-size: 22px">
-    <img src="/img/layered-music-logo.png" style="height:150px;" /><br />
+    <img src="/img/layered-music-logo.png" style="height: 150px" /><br />
     <hr />
     <div v-if="!account">
       Please connect your Metamask wallet first,<br />window should be open
       automatically or click below button.<br /><br />
-      <b-button type="is-primary" v-on:click="connect">CONNECT METAMASK</b-button>
+      <b-button type="is-primary" v-on:click="connect"
+        >CONNECT METAMASK</b-button
+      >
     </div>
     <div v-if="account">
-      <b>Welcome back</b><br /><i style="font-size: 12px">{{ account }}</i>
+      <!--<b>Welcome back</b><br /><i style="font-size: 12px">{{ account }}</i>
+      <br />
+      <hr />-->
+      <div class="row" style="padding-top: 15px">
+        <div class="columns">
+          <div class="column">
+            <b-tabs
+              v-model="activeTab"
+              expanded
+              :animated="false"
+              type="is-toggle-rounded"
+            >
+              <b-tab-item label="Mint new track">
+                <hr />
+                <div style="text-align: center">
+                  <div v-if="balanceMinting > 0">
+                    You can mint {{ balanceMinting }} tracks.<br />
+                    <b-button>Generate random seed</b-button>
+                  </div>
+                  <div v-if="balanceMinting === 0">
+                    You must pay 0.05 ETH for each track, please select how many tracks do you want to buy:
+                    <br>
+                    <b-numberinput v-model="howMuchBuy"></b-numberinput>
+                    <br>
+                    <b-button>Buy {{ howMuchBuy }} tracks for {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button>
+                  </div>
+                </div>
+              </b-tab-item>
+
+              <b-tab-item label="Your NFT tracks">
+                <hr />
+                {{ nftOwned }}
+              </b-tab-item>
+            </b-tabs>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -28,28 +66,56 @@ export default {
       contractAddress: process.env.VUE_APP_SMART_CONTRACT_ADDRESS,
       account: "",
       contract: {},
-      fileToMint: {},
-      isUploadingIPFS: false,
-      isUploadingMetadata: false,
+      howMuchBuy: 1,
+      seedToMint: "",
+      collectionToMint: "",
+      collections: ["0xJitzu"],
+      nftOwned: [],
+      balanceMinting: 0,
       isMinting: false,
+      activeTab: 0,
     };
   },
-  mounted() {
-    this.connect();
+  async mounted() {
+    await this.connect();
+    await this.checkContractUserState();
   },
   methods: {
-    async connect() {
-      window.ethereum.enable();
-      let accounts = await this.web3.eth.getAccounts();
-      let contract = await new this.web3.eth.Contract(
-        ABI,
-        this.contractAddress,
-        {
-          gasLimit: "5000000",
+    connect() {
+      const app = this;
+      return new Promise(async (response) => {
+        window.ethereum.enable();
+        let accounts = await app.web3.eth.getAccounts();
+        let contract = await new app.web3.eth.Contract(
+          ABI,
+          app.contractAddress,
+          {
+            gasLimit: "5000000",
+          }
+        );
+        app.contract = contract;
+        app.account = accounts[0];
+        response(true);
+      });
+    },
+    async checkContractUserState() {
+      const app = this;
+      if (app.account !== "") {
+        try {
+          let owned = await app.contract.methods.ownedTracks().call();
+          app.nftOwned = owned;
+        } catch (e) {
+          alert(e);
         }
-      );
-      this.contract = contract;
-      this.account = accounts[0];
+        try {
+          let balanceMinting = await app.contract.methods
+            .balanceOfMinting()
+            .call();
+          app.balanceMinting = parseInt(balanceMinting);
+        } catch (e) {
+          alert(e);
+        }
+      }
     },
   },
 };

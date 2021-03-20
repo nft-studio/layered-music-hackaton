@@ -3336,19 +3336,6 @@
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "value1",
-        "type": "uint256"
-      }
-    ],
-    "name": "buyed_amount",
-    "type": "event"
-  },
-  {
     "constant": false,
     "inputs": [
       {
