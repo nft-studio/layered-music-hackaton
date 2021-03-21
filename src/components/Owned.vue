@@ -25,7 +25,7 @@
               <img src="/img/stop.png" />
             </div>
           </div>
-          <Grid :small="true" :layers="layers[sequence]" />
+          <Grid :isPlaying="isPlayingOwn[sequence]" :small="true" :layers="layers[sequence]" />
         </div>
         <div style="font-size:13px; margin-top:5px; text-align:left;">
           Track {{ sequence }}
@@ -83,6 +83,7 @@ export default {
       seed: "",
       contract: {},
       nftOwned: [],
+      isPlayingOwn: {},
       layers: {},
       collectionToPlay: "0xJitzu",
       isPlaying: false,
@@ -140,6 +141,7 @@ export default {
               }
               seed = "0x" + seed;
               layers[seed] = sublayers;
+              app.isPlayingOwn[seed] = false;
             }
             app.layers = layers;
           }
@@ -179,6 +181,7 @@ export default {
         let variant = seed[k];
         await app.makeChannel(track + "-" + variant, 0);
       }
+      app.isPlayingOwn["0x" + seed] = true;
       setTimeout(function () {
         app.tone.Transport.start();
         app.isPlaying = true;
@@ -188,6 +191,7 @@ export default {
     },
     stop() {
       const app = this;
+      app.isPlayingOwn[app.whatPlaying] = false;
       app.whatPlaying = "";
       app.tone.Transport.stop();
       for (let k in app.channels) {

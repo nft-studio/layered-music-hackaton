@@ -118,18 +118,20 @@
                       "
                       >You must buy a<br>minting token first!</div
                     >
-                    <b-button
-                      style="float: right"
-                      v-if="seedFound && !isPlaying && !isLoadingTracks"
-                      v-on:click="playSeed"
-                      >Play seed!</b-button
-                    >
-                    <b-button
-                      style="float: right"
-                      v-if="seedFound && isPlaying"
-                      v-on:click="stop"
-                      >Stop seed!</b-button
-                    >
+                    <div style="width:100%; height:40px">
+                      <b-button
+                        style="float: right"
+                        v-if="seedFound && !isPlaying && !isLoadingTracks"
+                        v-on:click="playSeed"
+                        >Play seed!</b-button
+                      >
+                      <b-button
+                        style="float: right"
+                        v-if="seedFound && isPlaying"
+                        v-on:click="stop"
+                        >Stop seed!</b-button
+                      >
+                    </div>
                     <div v-if="isMinting">Minting..please wait</div>
                     <div v-if="isLoadingTracks">
                       Loading genesis tracks, please wait...
