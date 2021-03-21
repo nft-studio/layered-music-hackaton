@@ -18,6 +18,7 @@
     "rinkeby:mint": "node rinkeby/mint.js",
     "rinkeby:test": "node rinkeby/test.js",
     "rinkeby:burn": "node rinkeby/burn.js",
+    "rinkeby:withdraw": "node rinkeby/withdraw.js",
     "rinkeby:transfer": "bash rinkeby/transfer.sh"
   },
   "repository": {
