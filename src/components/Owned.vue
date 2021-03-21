@@ -1,53 +1,61 @@
 <template>
   <div>
     <div v-if="nftOwned.length > 0">
-      <div v-for="sequence in nftOwned" style="width:45%; margin:0 2.5%; display:inline-block;" :key="sequence">
-        Track {{ sequence }}
-        <div class="tile" style="position:relative;">
+      <div
+        v-for="sequence in nftOwned"
+        style="width: 45%; margin: 0 2.5%; display: inline-block"
+        :key="sequence"
+      >
+        <div class="tile" style="position: relative">
           <div class="controls">
             <div
               class="control-button"
-              v-if="(!isPlaying || whatPlaying !== sequence) && !isLoadingTracks"
+              v-if="
+                (!isPlaying || whatPlaying !== sequence) && !isLoadingTracks
+              "
               v-on:click="playSequence(sequence)"
-              ><img src="/img/play.png"></div
             >
+              <img src="/img/play.png" />
+            </div>
             <div
               class="control-button"
               v-if="whatPlaying === sequence && !isLoadingTracks"
               v-on:click="stop()"
-              ><img src="/img/stop.png"></div
             >
+              <img src="/img/stop.png" />
+            </div>
           </div>
           <Grid :layers="layers[sequence]" />
         </div>
+        <span style="font-size:13px">Track {{ sequence }}</span>
       </div>
     </div>
-    <div v-if="nftOwned === 0">You have never minted any track.</div>
+    <div v-if="nftOwned.length === 0"><span style="font-size:32px">Doh!</span><br>You have never minted any track.</div>
   </div>
 </template>
 
 <style scoped>
-.controls{
+.controls {
   display: none;
   position: absolute;
-  top:0; 
+  top: 0;
   left: 0;
-  width:100%;
-  background:rgba(0,0,0,0.3);
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
   height: 100%;
   border-radius: 10px;
 }
-.control-button{
+.control-button {
   position: absolute;
-  top:calc(50% - 15px);
+  top: calc(50% - 15px);
   left: calc(50% - 15px);
-  width:30px;
+  width: 30px;
   height: 30px;
 }
-.control-button:hover{
+.control-button:hover {
   cursor: pointer;
 }
-.tile:hover .controls{
+.tile:hover .controls {
   display: block;
 }
 </style>

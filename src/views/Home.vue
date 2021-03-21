@@ -11,7 +11,7 @@
     </div>
     <hr />
     <div v-if="!account">
-      Please connect your Metamask wallet first,<br />window should be open
+      Please connect your Metamask wallet first with <span style="color:#f00">Rinkeby Network</span>,<br />window should be open
       automatically or click below button.<br /><br />
       <b-button type="is-primary" v-on:click="connect"
         >CONNECT METAMASK</b-button
@@ -30,25 +30,35 @@
               <b-tab-item label="Mint new track">
                 <hr />
                 <div style="text-align: center">
-                  <div v-if="balanceMinting > 0">
+                  <div>
                     <div style="font-size: 32px">
                       You can mint {{ balanceMinting }}
-                      <span v-if="balanceMinting > 1">tracks</span
+                      <span v-if="balanceMinting > 1 || balanceMinting === 0"
+                        >tracks</span
                       ><span v-if="balanceMinting === 1">track</span>.
                     </div>
                     {{ trackCounts }} were created yet out of 720 max tracks.<br />
-                    <Grid style="margin: 30px 0" :layers="layers" />
+                    <div id="grid" style="padding: 20px">
+                      <Grid style="margin: 30px 0" :layers="layers" />
+                    </div>
                     <div v-if="seed">
-                      Generated sequence:<br />
+                      <span v-if="isGenerating">Generating random seeds from Smart Contract:</span>
+                      <span v-if="!isGenerating">Generated sequence:</span><br />
                       <div style="font-size: 12px">{{ seed }}</div>
                     </div>
                     <br />
-                    <b-button style="float: left" v-on:click="generateSeed"
+                    <b-button v-if="!isGenerating" style="float: left" v-on:click="generateSeed"
                       >Generate track</b-button
                     >
+                    <div v-if="isGenerating">Generating track, please wait..</div>
                     <b-button
                       style="float: right"
-                      v-if="seedFound && !isMinting && !wasMinted"
+                      v-if="
+                        balanceMinting > 0 &&
+                        seedFound &&
+                        !isMinting &&
+                        !wasMinted
+                      "
                       v-on:click="mintSeed"
                       >Mint seed!</b-button
                     >
@@ -66,7 +76,9 @@
                     >
                     <div v-if="isMinting">Minting..please wait</div>
                   </div>
+                  <br />
                   <div v-if="balanceMinting === 0">
+                    <hr />
                     You must pay 0.05 ETH (Rinkeby) for each track,<br />please
                     select how many tracks do you want to buy: <br /><br />
                     <b-numberinput v-model="howMuchBuy"></b-numberinput>
@@ -75,6 +87,7 @@
                       v-if="!isBuying"
                       type="is-primary"
                       v-on:click="buyMintings"
+                      :min="1"
                       >Buy {{ howMuchBuy }} tracks for
                       {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button
                     >
@@ -94,11 +107,12 @@
   </div>
 </template>
 <script>
+const html2canvas = require("html2canvas");
 import Grid from "@/components/Grid.vue";
 import Owned from "@/components/Owned.vue";
+const axios = require("axios");
 var Web3 = require("web3");
 const ABI = require("../util/abi.json");
-const axios = require("axios");
 import * as Tone from "tone";
 export default {
   name: "Home",
@@ -113,6 +127,7 @@ export default {
       web3: new Web3(window.ethereum),
       contractAddress: process.env.VUE_APP_SMART_CONTRACT_ADDRESS,
       account: "",
+      imagegrid: "",
       contract: {},
       howMuchBuy: 1,
       seed: "",
@@ -121,6 +136,7 @@ export default {
       collections: ["0xJitzu"],
       balanceMinting: 0,
       isMinting: false,
+      isGenerating: false,
       changed: 0,
       seedFound: false,
       isPlaying: false,
@@ -129,6 +145,7 @@ export default {
       activeTab: 0,
       trackCounts: 0,
       channels: {},
+      interval: "",
       layers: [
         { l: 1, v: 1 },
         { l: 2, v: 2 },
@@ -140,8 +157,13 @@ export default {
     };
   },
   async mounted() {
-    await this.connect();
-    await this.checkContractUserState();
+    const app = this;
+    await app.connect();
+    await app.checkContractUserState();
+    app.interval = setInterval(async function () {
+      await app.connect();
+      await app.checkContractUserState();
+    }, 500);
   },
   methods: {
     connect() {
@@ -158,6 +180,9 @@ export default {
         );
         app.contract = contract;
         app.account = accounts[0];
+        if (app.account !== "") {
+          clearInterval(app.interval);
+        }
         response(true);
       });
     },
@@ -207,6 +232,7 @@ export default {
     },
     async generateSeed() {
       const app = this;
+      app.isGenerating = true
       if (app.isPlaying) {
         app.stop();
       }
@@ -259,6 +285,24 @@ export default {
               app.seed = "0x" + sequence;
               app.seedFound = true;
               app.wasMinted = false;
+              app.isGenerating = false;
+              const dataurl = (
+                await html2canvas(document.getElementById("grid"))
+              ).toDataURL();
+              app.imagegrid = dataurl;
+              var bodyFormData = new FormData();
+              bodyFormData.append("image", app.imagegrid);
+              bodyFormData.append("sequence", app.seed);
+              try {
+                app.axios({
+                  method: "post",
+                  url: "https://layeredmusic.nftstud.io/api/generate.php",
+                  data: bodyFormData,
+                  headers: { "Content-Type": "multipart/form-data" },
+                });
+              } catch (e) {
+                console.log(e);
+              }
             }
           }
         }
