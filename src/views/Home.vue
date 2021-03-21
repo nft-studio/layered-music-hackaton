@@ -28,7 +28,7 @@
               :animated="false"
               type="is-toggle-rounded"
             >
-              <b-tab-item label="Buy minting tokens">
+              <b-tab-item label="1. Buy minting tokens">
                 <hr />
                 <div>
                   You must pay 0.05 ETH (Rinkeby) for each track,<br />please
@@ -49,7 +49,7 @@
                   <div v-if="isBuying">Buying tracks..please wait.</div>
                 </div>
               </b-tab-item>
-              <b-tab-item label="Mint new track">
+              <b-tab-item label="2. Generate and mint">
                 <hr />
                 <div style="text-align: center">
                   <div>
@@ -137,7 +137,7 @@
                   </div>
                 </div>
               </b-tab-item>
-              <b-tab-item label="Your tracks">
+              <b-tab-item label="3. Listen your music">
                 <hr />
                 <Owned :changed="changed" />
               </b-tab-item>
@@ -185,7 +185,7 @@ export default {
       isPlaying: false,
       isLoadingTracks: false,
       wasMinted: false,
-      activeTab: 1,
+      activeTab: 0,
       trackCounts: 0,
       channels: {},
       interval: "",
@@ -247,6 +247,11 @@ export default {
             .balanceOfMinting()
             .call({ from: app.account });
           app.balanceMinting = parseInt(balanceMinting);
+          if(app.balanceMinting === 0){
+            app.activeTab = 0;
+          }else{
+            app.activeTab = 1;
+          }
         } catch (e) {
           alert(e);
         }
