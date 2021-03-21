@@ -108,6 +108,16 @@
                       v-on:click="mintSeed"
                       >Mint seed!</b-button
                     >
+                    <div
+                      style="float: left; color:#f00; text-align:left; font-size:13px;"
+                      v-if="
+                        balanceMinting === 0 &&
+                        seedFound &&
+                        !isMinting &&
+                        !wasMinted
+                      "
+                      >You must buy a<br>minting token first!</div
+                    >
                     <b-button
                       style="float: right"
                       v-if="seedFound && !isPlaying && !isLoadingTracks"
