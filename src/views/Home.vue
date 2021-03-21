@@ -28,6 +28,24 @@
               :animated="false"
               type="is-toggle-rounded"
             >
+              <b-tab-item label="Buy minting tokens">
+                <hr />
+                <div>
+                    You must pay 0.05 ETH (Rinkeby) for each track,<br />please
+                    select how many tracks do you want to buy: <br /><br />
+                    <b-numberinput v-model="howMuchBuy"></b-numberinput>
+                    <br />
+                    <b-button
+                      v-if="!isBuying"
+                      type="is-primary"
+                      v-on:click="buyMintings"
+                      :min="1"
+                      >Buy {{ howMuchBuy }} tracks for
+                      {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button
+                    >
+                    <div v-if="isBuying">Buying tracks..please wait.</div>
+                  </div>
+              </b-tab-item>
               <b-tab-item label="Mint new track">
                 <hr />
                 <div style="text-align: center">
@@ -103,23 +121,6 @@
                       Loading genesis tracks, please wait...
                     </div>
                   </div>
-                  <br />
-                  <div v-if="balanceMinting === 0">
-                    <hr />
-                    You must pay 0.05 ETH (Rinkeby) for each track,<br />please
-                    select how many tracks do you want to buy: <br /><br />
-                    <b-numberinput v-model="howMuchBuy"></b-numberinput>
-                    <br />
-                    <b-button
-                      v-if="!isBuying"
-                      type="is-primary"
-                      v-on:click="buyMintings"
-                      :min="1"
-                      >Buy {{ howMuchBuy }} tracks for
-                      {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button
-                    >
-                    <div v-if="isBuying">Buying tracks..please wait.</div>
-                  </div>
                 </div>
               </b-tab-item>
               <b-tab-item label="Your tracks">
@@ -169,7 +170,7 @@ export default {
       isPlaying: false,
       isLoadingTracks: false,
       wasMinted: false,
-      activeTab: 0,
+      activeTab: 1,
       trackCounts: 0,
       channels: {},
       interval: "",
