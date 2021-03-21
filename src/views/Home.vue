@@ -37,7 +37,7 @@
                       ><span v-if="balanceMinting === 1">track</span>.
                     </div>
                     {{ trackCounts }} were created yet out of 720 max tracks.<br />
-                    <Grid style="margin:30px 0;" :layers="layers" />
+                    <Grid style="margin: 30px 0" :layers="layers" />
                     <div v-if="seed">
                       Generated sequence:<br />
                       <div style="font-size: 12px">{{ seed }}</div>
@@ -64,17 +64,21 @@
                       v-on:click="stop"
                       >Stop seed!</b-button
                     >
+                    <div v-if="isMinting">Minting..please wait</div>
                   </div>
                   <div v-if="balanceMinting === 0">
-                    You must pay 0.05 ETH for each track, please select how many
-                    tracks do you want to buy:
-                    <br />
+                    You must pay 0.05 ETH (Rinkeby) for each track,<br />please
+                    select how many tracks do you want to buy: <br /><br />
                     <b-numberinput v-model="howMuchBuy"></b-numberinput>
                     <br />
-                    <b-button v-on:click="buyMintings"
+                    <b-button
+                      v-if="!isBuying"
+                      type="is-primary"
+                      v-on:click="buyMintings"
                       >Buy {{ howMuchBuy }} tracks for
                       {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button
                     >
+                    <div v-if="isBuying">Buying tracks..please wait.</div>
                   </div>
                 </div>
               </b-tab-item>
@@ -112,6 +116,7 @@ export default {
       contract: {},
       howMuchBuy: 1,
       seed: "",
+      isBuying: false,
       collectionToMint: "0xJitzu",
       collections: ["0xJitzu"],
       balanceMinting: 0,
@@ -182,15 +187,21 @@ export default {
       const app = this;
       const ethAmount = (app.howMuchBuy * 0.05).toFixed(2);
       try {
-        const tx = await app.contract.methods.buyMinting().send({
+        app.isBuying = true;
+        await app.contract.methods.buyMinting().send({
           from: app.account,
           value: app.web3.utils.toWei(ethAmount, "ether"),
         });
-        console.log(tx);
-        alert("You just bought " + app.howMuchBuy + " tracks");
+        if (app.howMuchBuy === 1) {
+          alert("You just bought 1 track");
+        } else {
+          alert("You just bought " + app.howMuchBuy + " tracks");
+        }
+        app.isBuying = false;
         app.howMuchBuy = 1;
         app.checkContractUserState();
       } catch (e) {
+        app.isBuying = false;
         alert("Something went wrong!");
       }
     },
@@ -206,7 +217,7 @@ export default {
       try {
         while (!found) {
           retries++;
-          if (retries % 36 === 0) {
+          if (retries % 12 === 0) {
             console.log("Lowering difficulty.");
             if (max <= 6) {
               max++;
@@ -235,9 +246,9 @@ export default {
 
           // Checking if seed was minted before
           if (found) {
-            let sequence = ""
-            for(let j in app.layers){
-              sequence += app.layers[j].v.toString()
+            let sequence = "";
+            for (let j in app.layers) {
+              sequence += app.layers[j].v.toString();
             }
             let owned = await app.contract.methods
               .ownerTrack(sequence)
@@ -306,7 +317,7 @@ export default {
     async playSeed() {
       const app = this;
       await app.tone.start();
-      app.isLoadingTracks = true
+      app.isLoadingTracks = true;
       const toneMeter = new app.tone.Meter({ channels: 2 });
       app.tone.Destination.chain(toneMeter);
       for (let k in app.layers) {
@@ -321,8 +332,8 @@ export default {
     stop() {
       const app = this;
       app.tone.Transport.stop();
-      for(let k in app.channels){
-        app.channels[k].dispose()
+      for (let k in app.channels) {
+        app.channels[k].dispose();
       }
       this.isPlaying = false;
     },
@@ -337,7 +348,7 @@ export default {
         app.isMinting = false;
         app.wasMinted = true;
         app.checkContractUserState();
-        app.changed = new Date().getTime()
+        app.changed = new Date().getTime();
       } catch (e) {
         alert(JSON.stringify(e));
       }
