@@ -102,7 +102,7 @@ export default {
           pan,
         }).toDestination();
         const player = new app.tone.Player({
-          url: "/layers/" + app.collectionToMint + "/layer" + track + ".wav",
+          url: "/layers/" + app.collectionToMint + "/layer" + track + ".mp3",
           loop: true,
         })
           .sync()

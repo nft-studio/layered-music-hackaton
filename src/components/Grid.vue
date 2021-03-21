@@ -1,10 +1,11 @@
 <template>
   <div
     style="width: 100%; padding: 0 40px; background: #333; border-radius: 10px"
+    v-bind:class="{ layerSmall: small }"
   >
     <div class="row">
-      <div class="columns">
-        <div class="column" v-for="layer in layers" :key="layer.l">
+      <div class="columns is-mobile" v-bind:class="{ layerSmall: small }">
+        <div class="column is-2" v-for="layer in layers" :key="layer.l">
           <div
             :id="'layer-' + layer.l + '-1'"
             v-bind:class="{ layerActive: layer.v === 1 }"
@@ -79,12 +80,22 @@
   background: rgb(209, 12, 209) !important;
   color: rgb(209, 12, 209) !important;
 }
+.layerSmall .column{
+  margin: 5px 0!important;
+  padding:0 5px!important;
+}
+.layerSmall{
+  padding:5px 10px!important;
+}
+.layerSmall .layer{
+  margin:10px 0!important;
+}
 </style>
 
 <script>
 export default {
   name: "Grid",
-  props: ["layers", "isPlaying"],
+  props: ["layers", "isPlaying", "small"],
   data() {
     return {
       interval: "",
@@ -121,21 +132,3 @@ export default {
   },
 };
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>

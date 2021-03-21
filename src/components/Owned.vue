@@ -25,7 +25,7 @@
               <img src="/img/stop.png" />
             </div>
           </div>
-          <Grid :layers="layers[sequence]" />
+          <Grid :small="true" :layers="layers[sequence]" />
         </div>
         <span style="font-size:13px">Track {{ sequence }}</span>
       </div>
@@ -139,7 +139,6 @@ export default {
               layers[seed] = sublayers;
             }
             app.layers = layers;
-            console.log(layers);
           }
         } catch (e) {
           alert(e);
@@ -153,7 +152,7 @@ export default {
           pan,
         }).toDestination();
         const player = new app.tone.Player({
-          url: "/layers/" + app.collectionToPlay + "/layer" + track + ".wav",
+          url: "/layers/" + app.collectionToPlay + "/layer" + track + ".mp3",
           loop: true,
         })
           .sync()

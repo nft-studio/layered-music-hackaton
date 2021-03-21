@@ -31,20 +31,23 @@
               <b-tab-item label="Buy minting tokens">
                 <hr />
                 <div>
-                    You must pay 0.05 ETH (Rinkeby) for each track,<br />please
-                    select how many tracks do you want to buy: <br /><br />
-                    <b-numberinput v-model="howMuchBuy"></b-numberinput>
-                    <br />
-                    <b-button
-                      v-if="!isBuying"
-                      type="is-primary"
-                      v-on:click="buyMintings"
-                      :min="1"
-                      >Buy {{ howMuchBuy }} tracks for
-                      {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button
-                    >
-                    <div v-if="isBuying">Buying tracks..please wait.</div>
-                  </div>
+                  You must pay 0.05 ETH (Rinkeby) for each track,<br />please
+                  select how many tracks do you want to buy: <br /><br />
+                  <b-numberinput
+                    :min="1"
+                    :max="buyMax"
+                    v-model="howMuchBuy"
+                  ></b-numberinput>
+                  <br />
+                  <b-button
+                    v-if="!isBuying"
+                    type="is-primary"
+                    v-on:click="buyMintings"
+                    >Buy {{ howMuchBuy }} tracks for
+                    {{ (howMuchBuy * 0.05).toFixed(2) }} ETH</b-button
+                  >
+                  <div v-if="isBuying">Buying tracks..please wait.</div>
+                </div>
               </b-tab-item>
               <b-tab-item label="Mint new track">
                 <hr />
@@ -68,7 +71,17 @@
                         >OpenSea</a
                       >.
                     </span>
-                    <div id="grid" style="padding:20px">
+
+                    <hr />
+                    <br />
+
+                    <b-button v-if="!isGenerating" v-on:click="generateSeed"
+                      >Generate track</b-button
+                    >
+                    <div v-if="isGenerating" style="padding-bottom:6px;">
+                      Generating track, please wait..
+                    </div>
+                    <div id="grid" style="padding: 20px">
                       <Grid
                         style="margin: 30px 0"
                         :isPlaying="isPlaying"
@@ -85,16 +98,7 @@
                     </div>
                     <br />
                     <b-button
-                      v-if="!isGenerating"
                       style="float: left"
-                      v-on:click="generateSeed"
-                      >Generate track</b-button
-                    >
-                    <div v-if="isGenerating">
-                      Generating track, please wait..
-                    </div>
-                    <b-button
-                      style="float: right"
                       v-if="
                         balanceMinting > 0 &&
                         seedFound &&
@@ -158,6 +162,7 @@ export default {
       imagegrid: "",
       contract: {},
       howMuchBuy: 1,
+      buyMax: 720,
       seed: "",
       isBuying: false,
       collectionToMint: "0xJitzu",
@@ -183,6 +188,16 @@ export default {
         { l: 6, v: 6 },
       ],
     };
+  },
+  watch: {
+    howMuchBuy() {
+      const app = this;
+      if (app.howMuchBuy < 1) {
+        app.howMuchBuy = 1;
+      } else if (app.howMuchBuy > app.buyMax) {
+        app.howMuchBuy = app.buyMax;
+      }
+    },
   },
   async mounted() {
     const app = this;
@@ -231,6 +246,7 @@ export default {
             .trackCounts()
             .call({ from: app.account });
           app.trackCounts = parseInt(trackCounts);
+          app.buyMax = 720 - parseInt(app.trackCounts);
         } catch (e) {
           alert(e);
         }
@@ -268,6 +284,8 @@ export default {
     },
     async generateSeed() {
       const app = this;
+      app.seed = "";
+      app.seedFound = false;
       app.isGenerating = true;
       if (app.isPlaying) {
         app.stop();
@@ -322,7 +340,7 @@ export default {
               app.seedFound = true;
               app.wasMinted = false;
               app.isGenerating = false;
-              app.screenshot()
+              app.screenshot();
               var bodyFormData = new FormData();
               bodyFormData.append("image", app.imagegrid);
               bodyFormData.append("sequence", app.seed);
@@ -380,7 +398,7 @@ export default {
           pan,
         }).toDestination();
         const player = new app.tone.Player({
-          url: "/layers/" + app.collectionToMint + "/layer" + track + ".wav",
+          url: "/layers/" + app.collectionToMint + "/layer" + track + ".mp3",
           loop: true,
         })
           .sync()
