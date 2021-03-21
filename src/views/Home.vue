@@ -275,12 +275,15 @@ export default {
       }
     },
     async screenshot() {
-      const app = this;
-      window.scrollTo(0, 0);
-      const dataurl = (
-        await html2canvas(document.getElementById("grid"))
-      ).toDataURL();
-      app.imagegrid = dataurl;
+      return new Promise(async (response) => {
+        const app = this;
+        window.scrollTo(0, 0);
+        const dataurl = (
+          await html2canvas(document.getElementById("grid"))
+        ).toDataURL();
+        app.imagegrid = dataurl;
+        response(true)
+      });
     },
     async generateSeed() {
       const app = this;
@@ -340,7 +343,7 @@ export default {
               app.seedFound = true;
               app.wasMinted = false;
               app.isGenerating = false;
-              app.screenshot();
+              await app.screenshot();
               var bodyFormData = new FormData();
               bodyFormData.append("image", app.imagegrid);
               bodyFormData.append("sequence", app.seed);

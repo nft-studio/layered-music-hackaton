@@ -1,9 +1,8 @@
 <template>
   <div class="container" style="padding: 5vh 10%; font-size: 22px">
     <div style="height: 120px">
-      <a href="/"><img
-        src="/img/layered-music-logo.png"
-        style="height: 100px;"
+      <a href="/"
+        ><img src="/img/layered-music-logo.png" style="height: 100px"
       /></a>
     </div>
     <hr />
@@ -37,6 +36,7 @@
   </div>
 </template>
 <script>
+const html2canvas = require("html2canvas");
 import Grid from "@/components/Grid.vue";
 const axios = require("axios");
 var Web3 = require("web3");
@@ -126,6 +126,7 @@ export default {
         app.tone.Transport.start();
         app.isPlaying = true;
         app.isLoadingTracks = false;
+        app.generateAssets();
       }, 1000);
     },
     stop() {
@@ -135,6 +136,34 @@ export default {
         app.channels[k].dispose();
       }
       this.isPlaying = false;
+    },
+    async generateAssets() {
+      const app = this;
+      await app.screenshot();
+      var bodyFormData = new FormData();
+      bodyFormData.append("image", app.imagegrid);
+      bodyFormData.append("sequence", app.seed);
+      try {
+        app.axios({
+          method: "post",
+          url: "https://layeredmusic.nftstud.io/api/generate.php",
+          data: bodyFormData,
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    async screenshot() {
+      return new Promise(async (response) => {
+        const app = this;
+        window.scrollTo(0, 0);
+        const dataurl = (
+          await html2canvas(document.getElementById("grid"))
+        ).toDataURL();
+        app.imagegrid = dataurl;
+        response(true);
+      });
     },
   },
 };
