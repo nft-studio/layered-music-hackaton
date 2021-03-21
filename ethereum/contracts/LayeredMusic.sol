@@ -12,6 +12,7 @@ contract LayeredMusic is ERC721Tradable {
     // Unique feature
     mapping (string => address) private _absoluteHashes;
     mapping (address => string[]) private _creators;
+    uint256 MAX_TRACKS = 720;
 
     // Payable minting features
     uint256 mintingCost = 50 finney;
@@ -54,6 +55,7 @@ contract LayeredMusic is ERC721Tradable {
     function canMint(string memory tokenURI) internal returns (bool){
         require(_buyedMintings[msg.sender] > 0, 'The sender address didn\'t buyed any minting');
         require(!trackExists(tokenURI), "LayeredMusic: Trying to mint existent track");
+        require(returnTokenId() < MAX_TRACKS, "LayeredMusic: Max tracks reached");
         return true;
     }
 

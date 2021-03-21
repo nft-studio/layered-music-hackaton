@@ -31,23 +31,30 @@
                 <hr />
                 <div style="text-align: center">
                   <div v-if="balanceMinting > 0">
-                    You can mint {{ balanceMinting }} tracks,
-                    {{ trackCounts }} were created yet by other people.<br />
-                    <Grid :layers="layers" />
-                    <div style="font-size: 12px">{{ seed }}</div>
+                    <div style="font-size: 32px">
+                      You can mint {{ balanceMinting }}
+                      <span v-if="balanceMinting > 1">tracks</span
+                      ><span v-if="balanceMinting === 1">track</span>.
+                    </div>
+                    {{ trackCounts }} were created yet out of 720 max tracks.<br />
+                    <Grid style="margin:30px 0;" :layers="layers" />
+                    <div v-if="seed">
+                      Generated sequence:<br />
+                      <div style="font-size: 12px">{{ seed }}</div>
+                    </div>
                     <br />
                     <b-button style="float: left" v-on:click="generateSeed"
-                      >Generate random seed</b-button
+                      >Generate track</b-button
                     >
                     <b-button
                       style="float: right"
-                      v-if="seedFound && !isMinting"
+                      v-if="seedFound && !isMinting && !wasMinted"
                       v-on:click="mintSeed"
                       >Mint seed!</b-button
                     >
                     <b-button
                       style="float: right"
-                      v-if="seedFound && !isPlaying"
+                      v-if="seedFound && !isPlaying && !isLoadingTracks"
                       v-on:click="playSeed"
                       >Play seed!</b-button
                     >
@@ -71,9 +78,9 @@
                   </div>
                 </div>
               </b-tab-item>
-              <b-tab-item label="Your NFT tracks">
+              <b-tab-item label="Your tracks">
                 <hr />
-                {{ nftOwned }}
+                <Owned :changed="changed" />
               </b-tab-item>
             </b-tabs>
           </div>
@@ -84,8 +91,8 @@
 </template>
 <script>
 import Grid from "@/components/Grid.vue";
+import Owned from "@/components/Owned.vue";
 var Web3 = require("web3");
-var sha256 = require("sha256");
 const ABI = require("../util/abi.json");
 const axios = require("axios");
 import * as Tone from "tone";
@@ -93,6 +100,7 @@ export default {
   name: "Home",
   components: {
     Grid,
+    Owned,
   },
   data() {
     return {
@@ -106,13 +114,16 @@ export default {
       seed: "",
       collectionToMint: "0xJitzu",
       collections: ["0xJitzu"],
-      nftOwned: [],
       balanceMinting: 0,
       isMinting: false,
+      changed: 0,
       seedFound: false,
       isPlaying: false,
+      isLoadingTracks: false,
+      wasMinted: false,
       activeTab: 0,
       trackCounts: 0,
+      channels: {},
       layers: [
         { l: 1, v: 1 },
         { l: 2, v: 2 },
@@ -148,14 +159,6 @@ export default {
     async checkContractUserState() {
       const app = this;
       if (app.account !== "") {
-        try {
-          let owned = await app.contract.methods
-            .ownedTracks()
-            .call({ from: app.account });
-          app.nftOwned = owned;
-        } catch (e) {
-          alert(e);
-        }
         try {
           let balanceMinting = await app.contract.methods
             .balanceOfMinting()
@@ -193,8 +196,8 @@ export default {
     },
     async generateSeed() {
       const app = this;
-      if(app.isPlaying){
-        app.stop()
+      if (app.isPlaying) {
+        app.stop();
       }
       let distributions = [0, 0, 0, 0, 0, 0];
       let retries = 0;
@@ -204,8 +207,8 @@ export default {
         while (!found) {
           retries++;
           if (retries % 36 === 0) {
-            console.log('Lowering difficulty.')
-            if(max <= 6){
+            console.log("Lowering difficulty.");
+            if (max <= 6) {
               max++;
             }
           }
@@ -232,14 +235,19 @@ export default {
 
           // Checking if seed was minted before
           if (found) {
-            let finalseed = sha256(JSON.stringify(app.layers));
+            let sequence = ""
+            for(let j in app.layers){
+              sequence += app.layers[j].v.toString()
+            }
             let owned = await app.contract.methods
-              .ownerTrack(finalseed)
+              .ownerTrack(sequence)
               .call({ from: app.account });
             if (owned !== "0x0000000000000000000000000000000000000000") {
               found = false;
             } else {
+              app.seed = "0x" + sequence;
               app.seedFound = true;
+              app.wasMinted = false;
             }
           }
         }
@@ -280,53 +288,60 @@ export default {
     makeChannel(track, pan) {
       const app = this;
       return new Promise((response) => {
-        console.log("Adding " + track);
-        const channel = new Tone.Channel({
+        app.channels[track] = new app.tone.Channel({
           pan,
         }).toDestination();
-        const player = new Tone.Player({
+        const player = new app.tone.Player({
           url: "/layers/" + app.collectionToMint + "/layer" + track + ".wav",
           loop: true,
         })
           .sync()
           .start();
-        player.connect(channel);
-        Tone.loaded().then(() => {
-          console.log('Track loaded')
+        player.connect(app.channels[track]);
+        app.tone.loaded().then(() => {
           response(true);
         });
       });
     },
     async playSeed() {
       const app = this;
-      await Tone.start();
-      const toneMeter = new Tone.Meter({ channels: 2 });
-      Tone.Destination.chain(toneMeter);
+      await app.tone.start();
+      app.isLoadingTracks = true
+      const toneMeter = new app.tone.Meter({ channels: 2 });
+      app.tone.Destination.chain(toneMeter);
       for (let k in app.layers) {
         await app.makeChannel(app.layers[k].l + "-" + app.layers[k].v, 0);
       }
       setTimeout(function () {
-        Tone.Transport.start();
+        app.tone.Transport.start();
         app.isPlaying = true;
+        app.isLoadingTracks = false;
       }, 1000);
     },
     stop() {
-      Tone.Transport.stop();
+      const app = this;
+      app.tone.Transport.stop();
+      for(let k in app.channels){
+        app.channels[k].dispose()
+      }
       this.isPlaying = false;
     },
-    async mintSeed(){
-      const app = this
-      app.isMinting = true
-        try {
-          let minted = await app.contract.methods
-            .mintTrack(app.seed)
-            .send({ from: app.account });
-          alert("Successfully minted at: " + minted.transactionHash);
-          app.isMinting = false
-        } catch (e) {
-          alert(e);
-        }
-    }
+    async mintSeed() {
+      const app = this;
+      app.isMinting = true;
+      try {
+        let minted = await app.contract.methods
+          .mintTrack(app.seed)
+          .send({ from: app.account });
+        alert("Successfully minted at: " + minted.transactionHash);
+        app.isMinting = false;
+        app.wasMinted = true;
+        app.checkContractUserState();
+        app.changed = new Date().getTime()
+      } catch (e) {
+        alert(JSON.stringify(e));
+      }
+    },
   },
 };
 </script>

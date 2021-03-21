@@ -2,7 +2,6 @@
   <div
     style="
       width: 100%;
-      margin: 30px 0;
       padding: 0 40px;
       background: #333;
       border-radius: 10px;
@@ -11,12 +10,12 @@
     <div class="row">
       <div class="columns">
         <div class="column" v-for="layer in layers" :key="layer.l">
-          <div v-bind:class="{ layerActive: layer.v === 1 }" class="layer">Track {{ layer.l }} v1</div>
-          <div v-bind:class="{ layerActive: layer.v === 2 }" class="layer">Track {{ layer.l }} v2</div>
-          <div v-bind:class="{ layerActive: layer.v === 3 }" class="layer">Track {{ layer.l }} v3</div>
-          <div v-bind:class="{ layerActive: layer.v === 4 }" class="layer">Track {{ layer.l }} v4</div>
-          <div v-bind:class="{ layerActive: layer.v === 5 }" class="layer">Track {{ layer.l }} v5</div>
-          <div v-bind:class="{ layerActive: layer.v === 6 }" class="layer">Track {{ layer.l }} v6</div>
+          <div v-bind:class="{ layerActive: layer.v === 1 }" class="layer layer1"></div>
+          <div v-bind:class="{ layerActive: layer.v === 2 }" class="layer layer2"></div>
+          <div v-bind:class="{ layerActive: layer.v === 3 }" class="layer layer3"></div>
+          <div v-bind:class="{ layerActive: layer.v === 4 }" class="layer layer4"></div>
+          <div v-bind:class="{ layerActive: layer.v === 5 }" class="layer layer5"></div>
+          <div v-bind:class="{ layerActive: layer.v === 6 }" class="layer layer6"></div>
         </div>
       </div>
     </div>
@@ -34,9 +33,29 @@
     margin:20px 0;
     color: #888;
   }
-  .layerActive {
+  .layer1.layerActive {
     background: rgb(12, 209, 94)!important;
     color: rgb(12, 209, 94)!important;
+  }
+  .layer2.layerActive {
+    background: rgb(88, 12, 209)!important;
+    color: rgb(88, 12, 209)!important;
+  }
+  .layer3.layerActive {
+    background: rgb(209, 12, 55)!important;
+    color: rgb(209, 12, 55)!important;
+  }
+  .layer4.layerActive {
+    background: rgb(209, 180, 12)!important;
+    color: rgb(209, 180, 12)!important;
+  }
+  .layer5.layerActive {
+    background: rgb(12, 196, 209)!important;
+    color: rgb(12, 196, 209)!important;
+  }
+  .layer6.layerActive {
+    background: rgb(209, 12, 209)!important;
+    color: rgb(209, 12, 209)!important;
   }
 </style>
 

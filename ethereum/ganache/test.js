@@ -26,6 +26,21 @@ async function main() {
 
   const canMint = await nftContract.methods.balanceOfMinting().call();
   console.log('N. CAN MINT', canMint);
+  
+  let ended = false
+  let i = 1;
+  try {
+    while (!ended) {
+      console.log('CHECKING NFT #' + i)
+      const owner = await nftContract.methods.ownerOf(i).call();
+      const uri = await nftContract.methods.tokenURI(i).call();
+      console.log(uri, 'OWNER IS', owner)
+      i++
+    }
+  } catch (e) {
+    ended = true
+    // console.log(e)
+  }
 
   process.exit();
 }
