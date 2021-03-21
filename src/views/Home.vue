@@ -11,8 +11,9 @@
     </div>
     <hr />
     <div v-if="!account">
-      Please connect your Metamask wallet first with <span style="color:#f00">Rinkeby Network</span>,<br />window should be open
-      automatically or click below button.<br /><br />
+      Please connect your Metamask wallet first with
+      <span style="color: #f00">Rinkeby Network</span>,<br />window should be
+      open automatically or click below button.<br /><br />
       <b-button type="is-primary" v-on:click="connect"
         >CONNECT METAMASK</b-button
       >
@@ -38,19 +39,42 @@
                       ><span v-if="balanceMinting === 1">track</span>.
                     </div>
                     {{ trackCounts }} were created yet out of 720 max tracks.<br />
-                    <div id="grid" style="padding: 20px">
-                      <Grid style="margin: 30px 0" :layers="layers" />
+                    <span style="font-size: 16px">
+                      To mint a new track generate one first using "Generate
+                      track" button, then click "Mint track" button on the right
+                      to create the NFT!<br />You can see all the tracks
+                      directly on
+                      <a
+                        href="https://testnets.opensea.io/collection/layered-music"
+                        target="_blank"
+                        >OpenSea</a
+                      >.
+                    </span>
+                    <div id="grid" style="padding:20px">
+                      <Grid
+                        style="margin: 30px 0"
+                        :isPlaying="isPlaying"
+                        :layers="layers"
+                      />
                     </div>
                     <div v-if="seed">
-                      <span v-if="isGenerating">Generating random seeds from Smart Contract:</span>
-                      <span v-if="!isGenerating">Generated sequence:</span><br />
+                      <span v-if="isGenerating"
+                        >Generating random seeds from Smart Contract:</span
+                      >
+                      <span v-if="!isGenerating">Generated sequence:</span
+                      ><br />
                       <div style="font-size: 12px">{{ seed }}</div>
                     </div>
                     <br />
-                    <b-button v-if="!isGenerating" style="float: left" v-on:click="generateSeed"
+                    <b-button
+                      v-if="!isGenerating"
+                      style="float: left"
+                      v-on:click="generateSeed"
                       >Generate track</b-button
                     >
-                    <div v-if="isGenerating">Generating track, please wait..</div>
+                    <div v-if="isGenerating">
+                      Generating track, please wait..
+                    </div>
                     <b-button
                       style="float: right"
                       v-if="
@@ -75,6 +99,9 @@
                       >Stop seed!</b-button
                     >
                     <div v-if="isMinting">Minting..please wait</div>
+                    <div v-if="isLoadingTracks">
+                      Loading genesis tracks, please wait...
+                    </div>
                   </div>
                   <br />
                   <div v-if="balanceMinting === 0">
@@ -230,9 +257,17 @@ export default {
         alert("Something went wrong!");
       }
     },
+    async screenshot() {
+      const app = this;
+      window.scrollTo(0, 0);
+      const dataurl = (
+        await html2canvas(document.getElementById("grid"))
+      ).toDataURL();
+      app.imagegrid = dataurl;
+    },
     async generateSeed() {
       const app = this;
-      app.isGenerating = true
+      app.isGenerating = true;
       if (app.isPlaying) {
         app.stop();
       }
@@ -286,10 +321,7 @@ export default {
               app.seedFound = true;
               app.wasMinted = false;
               app.isGenerating = false;
-              const dataurl = (
-                await html2canvas(document.getElementById("grid"))
-              ).toDataURL();
-              app.imagegrid = dataurl;
+              app.screenshot()
               var bodyFormData = new FormData();
               bodyFormData.append("image", app.imagegrid);
               bodyFormData.append("sequence", app.seed);
