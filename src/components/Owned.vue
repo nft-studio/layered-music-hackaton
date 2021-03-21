@@ -27,7 +27,10 @@
           </div>
           <Grid :small="true" :layers="layers[sequence]" />
         </div>
-        <span style="font-size:13px">Track {{ sequence }}</span>
+        <div style="font-size:13px; margin-top:5px; text-align:left;">
+          Track {{ sequence }}
+          <a :href="'https://layeredmusic.nftstud.io/#/play/' + sequence" target="_blank" style="float:right">SHARE</a>
+        </div>
       </div>
     </div>
     <div v-if="nftOwned.length === 0"><span style="font-size:32px">Doh!</span><br>You have never minted any track.</div>
