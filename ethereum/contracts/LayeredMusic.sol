@@ -45,7 +45,7 @@ contract LayeredMusic is ERC721Tradable {
         return _creators[msg.sender];
     }
 
-    function trackCounts(string memory hash) public view returns (uint256) {
+    function trackCounts() public view returns (uint256) {
         return returnTokenId();
     }
 

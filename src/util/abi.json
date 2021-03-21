@@ -3877,13 +3877,7 @@
   },
   {
     "constant": true,
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "hash",
-        "type": "string"
-      }
-    ],
+    "inputs": [],
     "name": "trackCounts",
     "outputs": [
       {
