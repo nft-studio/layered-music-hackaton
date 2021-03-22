@@ -20,9 +20,9 @@ contract LayeredMusic is ERC721Tradable {
 
     // Payable minting features
     // uint256 mintingCost = 50 finney;
-    uint256 platformFee = 8 finney;
-    mapping (address => uint256) private _buyedMintings;
-    mapping (string => uint256) private _buyedMintingsProduction;
+    uint256 platformFee = 15;
+    mapping (address => mapping(string => uint256)) private _buyedMintings;
+    mapping (string => uint256) private _soldTracks;
 
     constructor(address _proxyRegistryAddress)
         public
@@ -60,14 +60,17 @@ contract LayeredMusic is ERC721Tradable {
         return returnTokenId();
     }
 
-    function trackCounts(string memory production) public view returns (uint256) {
+    function mintedTracksCount(string memory production) public view returns (uint256) {
         return _mintedTracks[production];
+    }
+
+    function soldTracksCount(string memory production) public view returns (uint256) {
+        return _soldTracks[production];
     }
 
     // Minting functions
 
     function canMint(string memory tokenURI) internal returns (bool){
-        require(_buyedMintings[msg.sender] > 0, 'The sender address didn\'t buyed any minting');
         require(!trackExists(tokenURI), "LayeredMusic: Trying to mint existent track");
         return true;
     }
@@ -77,11 +80,12 @@ contract LayeredMusic is ERC721Tradable {
         string memory tokenURI = string(abi.encodePacked(production,tokenSequence));
         require(_mintedTracks[production] < _maxTracks[production], "LayeredMusic: Max tracks reached");
         require(canMint(tokenURI), "LayeredMusic: Can't mint track");
+        require(_buyedMintings[msg.sender][production] > 0, "LayeredMusic: Didn't bought any minting");
         uint256 tokenId = mintTo(msg.sender, tokenURI);
         _absoluteHashes[tokenURI] = msg.sender;
         _creators[msg.sender].push(tokenURI);
         _mintedTracks[production]++;
-        _buyedMintings[msg.sender]--;
+        _buyedMintings[msg.sender][production]--;
         return tokenId;
     }
 
@@ -115,16 +119,16 @@ contract LayeredMusic is ERC721Tradable {
 
     function buyMinting(string memory production) public payable {
         require(productionExists(production), "LayeredMusic: Production doesn\'t exists");
-        require(_buyedMintingsProduction[production] < _maxTracks[production], "LayeredMusic: Max tracks reached");
+        require(_soldTracks[production] < _maxTracks[production], "LayeredMusic: Max tracks reached");
         uint256 mintingCost = _mintingCosts[production];
-        require(msg.value % mintingCost == 0, 'LayeredMusic: Amount should be a multiple of 0.05 ETH');
+        require(msg.value % mintingCost == 0, 'LayeredMusic: Amount should be a multiple of minting cost');
         uint256 amount = msg.value / mintingCost;
-        _buyedMintings[msg.sender] += amount;
-        _buyedMintingsProduction[production] += amount;
+        _buyedMintings[msg.sender][production] += amount;
+        _soldTracks[production] += amount;
     }
 
-    function balanceOfMinting() public view returns (uint256) {
-        return _buyedMintings[msg.sender];
+    function balanceOfMinting(string memory production) public view returns (uint256) {
+        return _buyedMintings[msg.sender][production];
     }
 
     function withdrawEther() public onlyOwner {
@@ -137,7 +141,8 @@ contract LayeredMusic is ERC721Tradable {
         uint256 minted = _mintedTracks[production];
         uint256 topay = _mintedTracks[production] - _paidTracks[production];
         require(topay > 0, 'LayeredMusic: Nothing to pay!');
-        uint256 reward = ( _mintingCosts[production] - platformFee ) * topay;
+        uint256 platformFeeValue = _mintingCosts[production] / 100 * platformFee;
+        uint256 reward = ( _mintingCosts[production] - platformFeeValue ) * topay;
         uint256 fee = platformFee * topay;
         address payable producerAddress = address(uint160(_productions[production]));
         msg.sender.transfer(fee);
